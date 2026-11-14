@@ -215,7 +215,32 @@ function setView(v) {
   if (act) $(act).classList.add('on');
 }
 
+let ensuring = false;
+
+function ensureMyHandle() {
+  const mine = usersMap[me.uid];
+  if (!mine || ensuring) return;
+  const needHandle = !mine.handle;
+  const hasEmail = !!mine.email;
+  if (!needHandle && !hasEmail) return;
+  ensuring = true;
+  const patch = {};
+  if (hasEmail) patch.email = '';
+  if (needHandle) {
+    let base = (me.email || mine.name || 'user').split('@')[0].toLowerCase().replace(/[^a-z0-9._]/g, '').slice(0, 24) || 'user';
+    if (base.length < 3) base = base + 'user';
+    let h = base, i = 1;
+    const taken = x => Object.values(usersMap).some(u => u.uid !== me.uid && handleOf(u) === x);
+    while (taken(h) && i < 50) { h = base + i; i++; }
+    patch.handle = h;
+  }
+  setDoc(doc(db, 'users', me.uid), patch, { merge: true })
+    .catch(showErr)
+    .finally(() => { ensuring = false; });
+}
+
 function renderNavAv() {
+  if (me) ensureMyHandle();
   if (!me) return;
   const box = $('navAv');
   box.innerHTML = '';
@@ -241,7 +266,7 @@ $('signup').onclick = async () => {
   signing = true;
   try {
     const c = await createUserWithEmailAndPassword(auth, $('email').value.trim(), $('pass').value);
-    await setDoc(doc(db, 'users', c.user.uid), { name: name, email: c.user.email, following: [] });
+    await setDoc(doc(db, 'users', c.user.uid),{ name: name, following: [] } );
   } catch (e) { $('msg').textContent = e.message; }
   signing = false;
 };
@@ -299,7 +324,7 @@ onAuthStateChanged(auth, user => {
       myName = d.name;
     } else if (!signing) {
       setDoc(doc(db, 'users', user.uid),
-        { name: myName, email: user.email }, { merge: true }).catch(showErr);
+      { name: myName }, { merge: true })  .catch(showErr);
     }
     render();
     renderReels();
