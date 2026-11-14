@@ -123,7 +123,7 @@ function hiddenUid(uid) {
 
 function handleOf(u) {
   if (u && u.handle) return u.handle;
-  const base = (u && u.email) ? u.email.split('@')[0] : ((u && u.name) || 'user');
+  const base = (u && u.name) || 'user';
   return base.toLowerCase().replace(/[^a-z0-9._]/g, '') || 'user';
 }
 
