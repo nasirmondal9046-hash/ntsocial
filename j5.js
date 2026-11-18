@@ -137,7 +137,7 @@ $('nrHash').onclick = () => {
   t.focus();
 };
 
-function sendVideo(f, opts) {
+function sendVideoOld(f, opts) {
   const fd = new FormData();
   fd.append('file', f);
   fd.append('upload_preset', PRESET);
