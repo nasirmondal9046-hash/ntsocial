@@ -177,7 +177,7 @@
 </div>
 
 <script type="module">
-const parts = ["j1.js", "j2.js", "j3.js", "j4.js", "j5.js"];
+const parts = ["j1.js", "j2.js", "j3.js", "j4.js", "j5.js", "j6.js"];
 try {
   const texts = await Promise.all(parts.map(p => fetch(p + '?v=1').then(r => {
     if (!r.ok) throw new Error('Missing file: ' + p);
